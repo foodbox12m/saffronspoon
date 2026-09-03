@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="saffron and & sppn creates generous Hyderabadi and Mediterranean feasts for the people you love.">
-  <title>saffron and & sppn | Gather around good food</title>
+  <meta name="description" content="saffron & spoon creates generous Hyderabadi and Mediterranean feasts for the people you love.">
+  <title>saffron & spoon | Gather around good food</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Playfair+Display:wght@600;700;800&display=swap" rel="stylesheet">
@@ -13,7 +13,7 @@
 <body>
   <header class="site-header">
     <div class="container nav-wrap">
-      <a class="brand" href="#top" aria-label="saffron and & sppn home"><span class="brand-mark">S<span>&</span>S</span><span class="brand-name">saffron and <i>&</i> sppn</span></a>
+      <a class="brand" href="#top" aria-label="saffron and spoon home"><span class="brand-mark">S<span>&</span>S</span><span class="brand-name">saffron <i>&</i> spoon</span></a>
       <button class="menu-toggle" aria-expanded="false" aria-controls="main-nav" aria-label="Open navigation">Menu</button>
       <nav class="main-nav" id="main-nav" aria-label="Main navigation"><a href="#menu">The menu</a><a href="#story">Our story</a><a href="#contact">Catering</a><a href="https://www.instagram.com/ayesh_aa0713?igsi=NTc4MTIwNjQ2YQ%3D%3D" target="_blank" rel="noreferrer">Instagram</a><button class="order-link" type="button" data-open-order>View order <span class="order-count">0</span></button></nav>
     </div>
@@ -33,7 +33,7 @@
     <section class="payment-section"><div class="container payment-grid"><div><p class="eyebrow">Easy payment</p><h2>Settle up with Zelle.</h2><p>Scan the code with your banking app to send payment to <strong>Ayesha Nousheen</strong>.</p></div><div class="qr-card"><img src="zelle-qr.png" alt="Zelle QR code for Ayesha Nousheen"><div><strong>Send money with Zelle</strong><span>Ayesha Nousheen</span></div></div></div></section>
   </main>
   <aside class="order-drawer" aria-label="Your order" aria-hidden="true"><div class="drawer-head"><div><p class="eyebrow">Your order</p><h2>Ready when you are.</h2></div><button class="close-drawer" type="button" data-close-order aria-label="Close order">&times;</button></div><div class="order-items"><p class="empty-order">Your table is waiting. Add a dish to get started.</p></div><div class="drawer-foot"><div><span>Estimated total</span><strong class="order-total">$0</strong></div><a class="button button-dark full-width" href="mailto:hello@saffronandstone.com?subject=New%20order%20request">Send order request</a></div></aside><div class="drawer-backdrop" data-close-order></div>
-  <footer><div class="container footer-wrap"><strong>saffron and <i>&</i> sppn</strong><span>Hyderabadi soul. Mediterranean spirit.</span><span>© 2026 saffron and & sppn</span></div></footer>
+  <footer><div class="container footer-wrap"><strong>saffron <i>&</i> spoon</strong><span>Hyderabadi soul. Mediterranean spirit.</span><span>© 2026 saffron & spoon</span></div></footer>
   <script>
     const drawer = document.querySelector('.order-drawer'); const backdrop = document.querySelector('.drawer-backdrop'); const items = []; const itemList = document.querySelector('.order-items'); const total = document.querySelector('.order-total'); const count = document.querySelector('.order-count');
     const renderOrder = () => { itemList.innerHTML = items.length ? items.map((item, index) => `<div class="order-item"><span>${item.name}</span><strong>$${item.price}</strong><button type="button" data-remove="${index}" aria-label="Remove ${item.name}">&times;</button></div>`).join('') : '<p class="empty-order">Your table is waiting. Add a dish to get started.</p>'; total.textContent = `$${items.reduce((sum, item) => sum + item.price, 0)}`; count.textContent = items.length; };
