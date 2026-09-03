@@ -1,5 +1,12 @@
 name: Deploy saffronspoon to GitHub Pages
 
+# Two things ship to Pages from one repo:
+#   /saffronspoon/      the static landing page (index.html, styles.css, script.js)
+#   /saffronspoon/app/  the React ordering app, built from web/ with Vite
+#
+# The server/ directory is NOT deployed here — it needs a live Node process.
+# See render.yaml.
+
 on:
   push:
     branches: [main]
@@ -15,20 +22,62 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Configure Pages
+        uses: actions/configure-pages@v5
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+          cache-dependency-path: web/package-lock.json
+
+      # Fail the deploy on a type error rather than shipping a broken app.
+      - name: Build the ordering app
+        working-directory: web
+        env:
+          VITE_BASE: /saffronspoon/app/
+          VITE_API_BASE_URL: ${{ vars.VITE_API_BASE_URL }}
+          VITE_ZELLE_ID: ${{ vars.VITE_ZELLE_ID }}
+          VITE_WHATSAPP_NUMBER: ${{ vars.VITE_WHATSAPP_NUMBER }}
+        run: |
+          npm ci
+          npm run build
+
+      - name: Assemble the site
+        run: |
+          mkdir -p _site/app
+          # Landing page and its assets.
+          cp index.html styles.css script.js _site/
+          cp zelle-qr.png _site/ 2>/dev/null || true
+          cp -r .well-known _site/ 2>/dev/null || true
+          # Built React app.
+          cp -r web/dist/. _site/app/
+          # Pages serves 404.html for unknown paths; sending it to the app makes
+          # client-side routes survive a hard refresh.
+          cp web/dist/index.html _site/404.html
+          # Stop Pages running the output through Jekyll, which strips
+          # underscore-prefixed files that Vite can emit.
+          touch _site/.nojekyll
+
+      - name: Upload site
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+
   deploy:
+    needs: build
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-      - name: Configure Pages
-        uses: actions/configure-pages@v5
-      - name: Upload site
-        uses: actions/upload-pages-artifact@v3
-        with:
-          path: .
       - name: Deploy to Pages
         id: deployment
         uses: actions/deploy-pages@v4

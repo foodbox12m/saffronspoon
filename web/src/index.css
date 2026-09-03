@@ -1,0 +1,87 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    color-scheme: light dark;
+  }
+
+  html {
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    @apply bg-cream-50 font-sans text-ink-900 antialiased;
+  }
+
+  .dark body {
+    @apply bg-ink-950 text-cream-100;
+  }
+
+  h1,
+  h2,
+  h3 {
+    @apply font-display tracking-tight;
+  }
+
+  /* Visible, high-contrast focus ring everywhere. */
+  :focus-visible {
+    @apply outline-none ring-2 ring-saffron-500 ring-offset-2 ring-offset-cream-50;
+  }
+
+  .dark :focus-visible {
+    @apply ring-saffron-400 ring-offset-ink-950;
+  }
+
+  input,
+  select,
+  textarea {
+    @apply font-sans;
+  }
+}
+
+@layer components {
+  .surface {
+    @apply rounded-2xl border border-cream-200 bg-white shadow-soft dark:border-ink-700 dark:bg-ink-900;
+  }
+
+  .btn {
+    @apply inline-flex min-h-[44px] items-center justify-center gap-2 rounded-xl px-5 text-sm font-semibold transition-[transform,background-color,color] duration-200 disabled:cursor-not-allowed disabled:opacity-45;
+  }
+
+  .btn-primary {
+    @apply btn bg-saffron-500 text-ink-950 hover:bg-saffron-400 active:scale-[0.98];
+  }
+
+  .btn-secondary {
+    @apply btn border border-ink-900/20 bg-transparent text-ink-900 hover:border-saffron-600 hover:text-saffron-700 active:scale-[0.98] dark:border-cream-100/25 dark:text-cream-100 dark:hover:border-saffron-400 dark:hover:text-saffron-300;
+  }
+
+  .field-label {
+    @apply mb-1.5 block text-xs font-semibold uppercase tracking-[0.14em] text-ink-600 dark:text-cream-300;
+  }
+
+  .field {
+    @apply block w-full rounded-xl border border-cream-300 bg-cream-50 px-3.5 py-3 text-base text-ink-900 placeholder:text-ink-600/55 dark:border-ink-600 dark:bg-ink-800 dark:text-cream-100 dark:placeholder:text-cream-300/50;
+  }
+
+  .eyebrow {
+    @apply text-[0.68rem] font-bold uppercase tracking-[0.2em] text-saffron-700 dark:text-saffron-400;
+  }
+
+  .tabular {
+    font-variant-numeric: tabular-nums lining-nums;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}

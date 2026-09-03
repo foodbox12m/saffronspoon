@@ -1,0 +1,86 @@
+# Render blueprint — https://render.com/docs/blueprint-spec
+#
+# Deploys the Node API (WhatsApp webhook, ordering endpoints, payment page).
+# The customer-facing React app is static and deploys separately to GitHub
+# Pages or Vercel; only this service needs a long-lived Node process.
+#
+# To use: push this file, then in Render choose New → Blueprint and point it at
+# the repo. Secrets marked `sync: false` must be filled in the dashboard — they
+# are deliberately not stored in git.
+
+services:
+  - type: web
+    name: saffronspoon-api
+    runtime: node
+    plan: starter # Free tier sleeps after inactivity; a sleeping webhook drops WhatsApp messages.
+    region: oregon
+    rootDir: server
+    buildCommand: npm ci && npm run build
+    startCommand: npm start
+    healthCheckPath: /health
+
+    # Baileys stores its WhatsApp session on disk. Without a persistent disk the
+    # QR code must be re-scanned on every deploy. Not needed for Twilio.
+    # disk:
+    #   name: baileys-auth
+    #   mountPath: /opt/render/project/src/server/.baileys-auth
+    #   sizeGB: 1
+
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: NODE_VERSION
+        value: '20'
+
+      - key: PUBLIC_BASE_URL
+        fromService:
+          type: web
+          name: saffronspoon-api
+          property: host
+      - key: WEB_APP_URL
+        value: https://foodbox12m.github.io/saffronspoon/app/
+      - key: ALLOWED_ORIGINS
+        value: https://foodbox12m.github.io
+
+      # Generated once by Render and kept stable across deploys.
+      - key: JWT_SECRET
+        generateValue: true
+      - key: ACCESS_TOKEN_TTL_SECONDS
+        value: '900'
+
+      # --- Fill these in the Render dashboard ---
+      - key: STAFF_ACCESS_CODE
+        sync: false
+      - key: ZELLE_ID
+        sync: false
+      - key: ZELLE_RECIPIENT_NAME
+        sync: false
+      - key: WHATSAPP_PROVIDER
+        value: twilio
+      - key: WHATSAPP_BUSINESS_NUMBER
+        sync: false
+      - key: TWILIO_ACCOUNT_SID
+        sync: false
+      - key: TWILIO_AUTH_TOKEN
+        sync: false
+      - key: TWILIO_WHATSAPP_FROM
+        sync: false
+      - key: TWILIO_VALIDATE_SIGNATURE
+        value: 'true'
+      - key: ADMIN_NOTIFY_NUMBERS
+        sync: false
+      - key: SUPABASE_URL
+        sync: false
+      - key: SUPABASE_SERVICE_ROLE_KEY
+        sync: false
+      - key: AGENT_API_KEY
+        sync: false
+      - key: AGENT_MODEL
+        value: gpt-4o-mini
+
+      - key: TAX_BASIS_POINTS
+        value: '938'
+      - key: DEPOSIT_PERCENT
+        value: '50'
+      - key: DELIVERY_FEE_CENTS
+        value: '0'

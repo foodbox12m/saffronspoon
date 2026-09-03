@@ -1,0 +1,25 @@
+node_modules/
+dist/
+build/
+_site/
+
+# Secrets. .env.example is committed; .env never is.
+.env
+.env.*
+!.env.example
+
+# Baileys WhatsApp session credentials — treat as a password to the account.
+.baileys-auth/
+**/.baileys-auth/
+
+# Optional Uber Eats export used to seed the knowledge base. May contain
+# customer-identifying data, so it stays local.
+server/src/kb/data/ubereats.json
+
+*.log
+npm-debug.log*
+.DS_Store
+.vscode/
+.idea/
+coverage/
+.vercel
