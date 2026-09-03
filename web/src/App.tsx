@@ -7,6 +7,9 @@ import StickyCartBar from './components/StickyCartBar';
 import DetailsForm from './components/DetailsForm';
 import ReviewStep from './components/ReviewStep';
 import ZelleScreen from './components/ZelleScreen';
+import CateringLanding from './components/CateringLanding';
+import CateringMenu from './components/CateringMenu';
+import CateringInquiryForm from './components/CateringInquiryForm';
 import { useCart } from './hooks/useCart';
 import { useTheme } from './hooks/useTheme';
 import { claimPayment, createOrder, fetchMenu, fetchQuote } from './lib/api';
@@ -14,9 +17,9 @@ import { localMenu, previewQuote } from './lib/menu';
 import { localMemoCode } from './lib/memo';
 import { buildOrderMessage, whatsappLink } from './lib/whatsapp';
 import { HAS_API } from './lib/env';
-import type { EventDetails, Menu, Quote } from './types';
+import type { EventDetails, Menu, Quote, CateringInquiry } from './types';
 
-type Step = 'menu' | 'details' | 'review' | 'pay';
+type Step = 'menu' | 'catering' | 'catering-menu' | 'catering-inquiry' | 'details' | 'review' | 'pay';
 
 const emptyDetails: EventDetails = {
   name: '',
@@ -43,6 +46,9 @@ export default function App() {
   const [memoCode, setMemoCode] = useState<string>('');
   const [orderConfirmed, setOrderConfirmed] = useState(false);
   const [claimState, setClaimState] = useState<'idle' | 'sending' | 'done' | 'error'>('idle');
+
+  // Catering state
+  const [cateringSelections, setCateringSelections] = useState<Record<string, number>>({});
 
   // Refresh the menu from the API when available; the bundled copy renders instantly.
   useEffect(() => {
@@ -146,6 +152,42 @@ export default function App() {
     [orderConfirmed, orderId],
   );
 
+  const submitCateringInquiry = useCallback(async (inquiry: CateringInquiry) => {
+    setBusy(true);
+    try {
+      // For now, send to WhatsApp as fallback
+      const selectedItems = menu.items.filter((item) =>
+        inquiry.selectedItems.some((sel) => sel.itemId === item.id)
+      );
+
+      const message = [
+        'Hi saffron & spoon! I would like to place a catering inquiry.',
+        '',
+        'Customer Information:',
+        `Name: ${inquiry.name}`,
+        `Email: ${inquiry.email}`,
+        `Phone: ${inquiry.phone}`,
+        `Event Date: ${inquiry.eventDate}`,
+        `Guest Count: ${inquiry.guestCount}`,
+        '',
+        'Requested Items:',
+        ...inquiry.selectedItems.map((sel) => {
+          const item = selectedItems.find((i) => i.id === sel.itemId);
+          return `• ${sel.quantity} × ${item?.name}`;
+        }),
+        '',
+        ...(inquiry.specialRequests ? [`Special Requests: ${inquiry.specialRequests}`] : []),
+      ].join('\n');
+
+      const href = whatsappLink(message);
+      window.open(href, '_blank');
+      setCateringSelections({});
+      setStep('menu');
+    } finally {
+      setBusy(false);
+    }
+  }, [menu.items]);
+
   const startOver = useCallback(() => {
     cart.clear();
     setDetails(emptyDetails);
@@ -154,6 +196,7 @@ export default function App() {
     setMemoCode('');
     setOrderConfirmed(false);
     setClaimState('idle');
+    setCateringSelections({});
     setStep('menu');
     window.scrollTo({ top: 0 });
   }, [cart]);
@@ -165,6 +208,7 @@ export default function App() {
         onToggleTheme={toggle}
         cartCount={cart.count}
         onOpenCart={() => setCartOpen(true)}
+        onNavigateToCartering={() => setStep('catering')}
       />
 
       <main className="mx-auto flex w-full max-w-6xl flex-col gap-8 px-4 py-8 sm:px-6 sm:py-12">
@@ -179,6 +223,13 @@ export default function App() {
                 Authentic homemade Hyderabadi cuisine. Pick your dishes, choose full or half trays, and pay by Zelle. Full trays serve
                 18&ndash;22 guests; half trays serve 9&ndash;11.
               </p>
+              <button
+                type="button"
+                className="btn-primary w-fit mt-2"
+                onClick={() => setStep('catering')}
+              >
+                Or order by catering
+              </button>
             </section>
             {offlineNotice ? <Notice tone="warn">{offlineNotice}</Notice> : null}
             <MenuBrowser menu={menu} onAdd={cart.add} />
@@ -193,6 +244,71 @@ export default function App() {
               </button>
             </div>
           </>
+        ) : null}
+
+        {step === 'catering' ? (
+          <CateringLanding
+            selectionCount={Object.values(cateringSelections).reduce((a, b) => a + b, 0)}
+            onStartOrdering={() => setStep('catering-menu')}
+          />
+        ) : null}
+
+        {step === 'catering-menu' ? (
+          <>
+            <section className="flex flex-col gap-4">
+              <button
+                type="button"
+                onClick={() => setStep('catering')}
+                className="text-saffron-600 hover:text-saffron-700 dark:text-saffron-400 dark:hover:text-saffron-300 w-fit text-sm"
+              >
+                ← Back
+              </button>
+              <p className="eyebrow">Build Your Catering Order</p>
+              <h2 className="text-3xl font-bold leading-[1.15]">
+                Select your dishes
+              </h2>
+              <p className="max-w-xl text-sm leading-relaxed text-ink-600 dark:text-cream-300">
+                Choose the items you'd like for your event. You can adjust quantities for each dish.
+              </p>
+            </section>
+            <CateringMenu
+              menu={menu}
+              selections={cateringSelections}
+              onSelectionChange={(itemId, quantity) => {
+                setCateringSelections((prev) => ({
+                  ...prev,
+                  [itemId]: quantity,
+                }));
+              }}
+            />
+            <div className="flex gap-3">
+              <button
+                type="button"
+                onClick={() => setStep('catering')}
+                className="btn-secondary"
+              >
+                Back
+              </button>
+              <button
+                type="button"
+                onClick={() => setStep('catering-inquiry')}
+                className="btn-primary flex-1 sm:flex-none"
+                disabled={Object.values(cateringSelections).every((q) => q === 0)}
+              >
+                Continue to Details
+              </button>
+            </div>
+          </>
+        ) : null}
+
+        {step === 'catering-inquiry' ? (
+          <CateringInquiryForm
+            menu={menu}
+            selections={cateringSelections}
+            submitting={busy}
+            onBack={() => setStep('catering-menu')}
+            onSubmit={submitCateringInquiry}
+          />
         ) : null}
 
         {step === 'details' ? (

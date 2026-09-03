@@ -5,9 +5,10 @@ interface Props {
   onToggleTheme: () => void;
   cartCount: number;
   onOpenCart: () => void;
+  onNavigateToCartering?: () => void;
 }
 
-export default function Header({ theme, onToggleTheme, cartCount, onOpenCart }: Props) {
+export default function Header({ theme, onToggleTheme, cartCount, onOpenCart, onNavigateToCartering }: Props) {
   return (
     <header className="sticky top-0 z-30 border-b border-cream-200/80 bg-cream-50/90 backdrop-blur dark:border-ink-700/80 dark:bg-ink-950/85">
       <div className="mx-auto flex w-full max-w-6xl items-center justify-between gap-3 px-4 py-3 sm:px-6">
@@ -32,6 +33,15 @@ export default function Header({ theme, onToggleTheme, cartCount, onOpenCart }: 
         </a>
 
         <div className="flex shrink-0 items-center gap-2">
+          {onNavigateToCartering && (
+            <button
+              type="button"
+              onClick={onNavigateToCartering}
+              className="btn-secondary min-h-[40px] px-3 text-xs"
+            >
+              Catering
+            </button>
+          )}
           <button
             type="button"
             onClick={onToggleTheme}

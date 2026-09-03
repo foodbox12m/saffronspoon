@@ -74,3 +74,23 @@ export interface OrderResponse {
   totalCents: number;
   status: string;
 }
+
+export interface CateringSelection {
+  itemId: string;
+  quantity: number;
+}
+
+export interface CateringInquiry {
+  name: string;
+  email: string;
+  phone: string;
+  eventDate: string;
+  guestCount: string;
+  selectedItems: CateringSelection[];
+  specialRequests: string;
+}
+
+export interface GuestCountOption {
+  label: string;
+  value: string;
+}
