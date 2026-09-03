@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import type { Menu, CateringSelection } from '../types';
+import type { Menu } from '../types';
 import CateringCard from './CateringCard';
 
 interface Props {
@@ -33,21 +33,32 @@ export default function CateringMenu({
       <div className="border-b border-cream-200 dark:border-ink-700">
         <div className="flex gap-2 overflow-x-auto pb-0">
           {menu.categories.map((category) => {
-            const itemCount = itemsByCategory[category.id]?.length || 0;
+            const categoryItems = itemsByCategory[category.id] || [];
+            const itemCount = categoryItems.length;
             if (itemCount === 0) return null;
+
+            const selectedCount = categoryItems.reduce(
+              (sum, item) => sum + (selections[item.id] || 0),
+              0,
+            );
 
             return (
               <button
                 key={category.id}
                 onClick={() => setActiveCategory(category.id)}
-                className={`px-4 py-3 text-sm font-semibold whitespace-nowrap border-b-2 transition-colors duration-200 ${
+                className={`px-4 py-3 text-sm font-semibold whitespace-nowrap border-b-2 transition-colors duration-200 flex items-center gap-1.5 ${
                   activeCategory === category.id
                     ? 'border-saffron-500 text-saffron-600 dark:border-saffron-400 dark:text-saffron-400'
                     : 'border-transparent text-ink-600 hover:text-ink-900 dark:text-cream-400 dark:hover:text-cream-200'
                 }`}
               >
-                {category.name}
-                <span className="ml-1.5 text-xs opacity-70">({itemCount})</span>
+                <span>{category.name}</span>
+                <span className="text-xs opacity-70">({itemCount})</span>
+                {selectedCount > 0 && (
+                  <span className="ml-1 rounded-full bg-saffron-500 px-1.5 py-0.2 text-[0.68rem] font-bold text-ink-950">
+                    {selectedCount}
+                  </span>
+                )}
               </button>
             );
           })}

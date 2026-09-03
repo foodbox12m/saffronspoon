@@ -43,13 +43,25 @@ export default function ItemCard({ item, currency, servings, onAdd }: Props) {
           {formatCents(unit, currency)}
         </span>
         <span className="text-xs text-ink-600 dark:text-cream-300">
-          {activeSize === 'full' ? 'Full tray' : 'Half tray'}
-          {serves ? ` · serves ${serves.min}–${serves.max}` : ''}
+          {item.unit ? (
+            item.minOrder ? `Min. ${item.minOrder} ${item.unit}s` : `Per ${item.unit}`
+          ) : (
+            <>
+              {activeSize === 'full' ? 'Full tray' : 'Half tray'}
+              {serves ? ` · serves ${serves.min}–${serves.max}` : ''}
+            </>
+          )}
         </span>
       </div>
 
       <div className="flex flex-col gap-3">
-        {fullOnly ? (
+        {item.unit ? (
+          item.notes ? (
+            <p className="text-xs font-semibold text-saffron-700 dark:text-saffron-300">
+              {item.notes}
+            </p>
+          ) : null
+        ) : fullOnly ? (
           <p className="text-xs font-semibold text-ink-600 dark:text-cream-300">
             Full tray only — half tray unavailable
           </p>
@@ -85,7 +97,7 @@ export default function ItemCard({ item, currency, servings, onAdd }: Props) {
         <div className="flex flex-wrap items-end gap-3">
           <div className="shrink-0">
             <label className="field-label" htmlFor={`qty-${item.id}`}>
-              Trays
+              {item.unit ? 'Quantity' : 'Trays'}
             </label>
             <div className="flex items-center gap-1">
               <button

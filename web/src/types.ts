@@ -21,6 +21,9 @@ export interface MenuItem {
   aliases?: string[];
   popular?: boolean;
   fullTrayOnly?: boolean;
+  unit?: string;
+  minOrder?: number;
+  notes?: string;
 }
 
 export interface TrayServings {
@@ -88,6 +91,7 @@ export interface CateringInquiry {
   guestCount: string;
   selectedItems: CateringSelection[];
   specialRequests: string;
+  estimatedTotalCents?: number;
 }
 
 export interface GuestCountOption {

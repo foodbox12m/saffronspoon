@@ -55,15 +55,29 @@ export default function CateringCard({
           {formatCents(item.prices.full, currency)}
         </span>
         <span className="text-xs text-ink-600 dark:text-cream-300">
-          Full tray
-          {item.prices.half !== null && (
+          {item.unit ? (
+            <span>
+              {item.minOrder ? `Min. ${item.minOrder} ${item.unit}s` : `Per ${item.unit}`}
+            </span>
+          ) : (
             <>
-              <br />
-              {formatCents(item.prices.half, currency)} half tray
+              Full tray
+              {item.prices.half !== null && (
+                <>
+                  <br />
+                  {formatCents(item.prices.half, currency)} half tray
+                </>
+              )}
             </>
           )}
         </span>
       </div>
+
+      {item.notes && (
+        <p className="text-xs font-medium text-saffron-700 dark:text-saffron-300">
+          ℹ️ {item.notes}
+        </p>
+      )}
 
       <div className="flex flex-wrap items-end gap-3">
         <div className="shrink-0">
@@ -84,6 +98,7 @@ export default function CateringCard({
               type="number"
               inputMode="numeric"
               min="0"
+              max="100"
               value={quantity}
               onChange={(event) =>
                 handleQuantityChange(Math.max(0, Number(event.target.value) || 0))
@@ -102,12 +117,15 @@ export default function CateringCard({
         </div>
         <button
           type="button"
-          className={`btn-secondary flex-1 ${
-            quantity > 0 ? 'ring-2 ring-saffron-500 dark:ring-saffron-400' : ''
+          className={`flex-1 min-h-[44px] rounded-xl px-4 text-sm font-semibold transition-all ${
+            isSelected
+              ? 'bg-saffron-500 text-ink-950 font-bold hover:bg-saffron-400 dark:bg-saffron-400 dark:text-ink-950 shadow-sm'
+              : 'btn-secondary'
           }`}
-          onClick={() => onSelect(item.id, quantity === 0 ? 1 : quantity)}
+          onClick={() => onSelect(item.id, isSelected ? 0 : 1)}
+          aria-pressed={isSelected}
         >
-          {quantity > 0 ? `Selected: ${quantity}` : 'Select'}
+          {isSelected ? `✓ Selected (${quantity})` : 'Select Dish'}
         </button>
       </div>
     </li>

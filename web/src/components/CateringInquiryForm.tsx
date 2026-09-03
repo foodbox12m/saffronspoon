@@ -39,7 +39,7 @@ export default function CateringInquiryForm({
 
   const [errors, setErrors] = useState<Errors>({});
 
-  const selectedItems = useMemo(() => {
+  const selectedItems: CateringSelection[] = useMemo(() => {
     return Object.entries(selections)
       .filter(([, qty]) => qty > 0)
       .map(([itemId, quantity]) => ({
@@ -65,7 +65,7 @@ export default function CateringInquiryForm({
     if (!formData.email.trim()) {
       newErrors.email = 'Email is required.';
     } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
-      newErrors.email = 'Please enter a valid email.';
+      newErrors.email = 'Please enter a valid email address.';
     }
     if (formData.phone.replace(/\D/g, '').length < 10) {
       newErrors.phone = 'Enter a valid 10-digit phone number.';
@@ -74,7 +74,7 @@ export default function CateringInquiryForm({
       newErrors.eventDate = 'Pick the date of your event.';
     }
     if (selectedItems.length === 0) {
-      newErrors.items = 'Please select at least one item.';
+      newErrors.items = 'Please select at least one item from the menu.';
     }
 
     setErrors(newErrors);
@@ -86,13 +86,14 @@ export default function CateringInquiryForm({
     if (!validateForm()) return;
 
     onSubmit({
-      name: formData.name,
-      email: formData.email,
-      phone: formData.phone,
+      name: formData.name.trim(),
+      email: formData.email.trim(),
+      phone: formData.phone.trim(),
       eventDate: formData.eventDate,
       guestCount: formData.guestCount,
       selectedItems,
-      specialRequests: formData.specialRequests,
+      specialRequests: formData.specialRequests.trim(),
+      estimatedTotalCents: estimatedTotal,
     });
   };
 
@@ -124,18 +125,31 @@ export default function CateringInquiryForm({
         {/* Selected Items Summary */}
         {selectedItems.length > 0 && (
           <div className="rounded-lg bg-saffron-500/10 p-4">
-            <p className="text-xs font-semibold uppercase tracking-[0.14em] text-saffron-700 dark:text-saffron-300 mb-3">
-              Your Selection
-            </p>
-            <ul className="flex flex-col gap-1">
+            <div className="flex items-center justify-between mb-3">
+              <p className="text-xs font-semibold uppercase tracking-[0.14em] text-saffron-700 dark:text-saffron-300">
+                Your Selection ({selectedItems.reduce((acc, s) => acc + s.quantity, 0)} items)
+              </p>
+              <button
+                type="button"
+                onClick={onBack}
+                className="text-xs font-semibold text-saffron-600 hover:text-saffron-700 dark:text-saffron-400 dark:hover:text-saffron-300 underline decoration-dotted"
+              >
+                Modify Dishes
+              </button>
+            </div>
+            <ul className="flex flex-col gap-1.5">
               {selectedItems.map((sel) => {
                 const item = menu.items.find((i) => i.id === sel.itemId);
                 if (!item) return null;
                 const lineTotal = item.prices.full * sel.quantity;
+                const unitLabel = item.unit ? ` (${item.unit})` : ' (Full tray)';
                 return (
-                  <li key={sel.itemId} className="text-sm text-ink-700 dark:text-cream-200">
-                    {sel.quantity} × {item.name} — 
-                    <span className="ml-1 tabular font-semibold text-saffron-700 dark:text-saffron-300">
+                  <li key={sel.itemId} className="flex items-baseline justify-between text-sm text-ink-700 dark:text-cream-200">
+                    <span>
+                      <strong className="font-semibold text-ink-950 dark:text-cream-50">{sel.quantity}×</strong> {item.name}
+                      <span className="text-xs text-ink-500 dark:text-cream-400">{unitLabel}</span>
+                    </span>
+                    <span className="tabular font-semibold text-saffron-700 dark:text-saffron-300">
                       {formatCents(lineTotal, menu.currency)}
                     </span>
                   </li>
@@ -143,9 +157,14 @@ export default function CateringInquiryForm({
               })}
             </ul>
             <div className="mt-3 border-t border-saffron-500/20 pt-3 flex items-center justify-between">
-              <span className="text-xs font-semibold text-ink-900 dark:text-cream-100">
-                Estimated Total
-              </span>
+              <div>
+                <span className="block text-xs font-semibold text-ink-900 dark:text-cream-100">
+                  Estimated Total
+                </span>
+                <span className="text-[0.68rem] text-ink-500 dark:text-cream-400">
+                  Includes food preparation &amp; packaging
+                </span>
+              </div>
               <span className="tabular font-display text-xl font-bold text-saffron-700 dark:text-saffron-300">
                 {formatCents(estimatedTotal, menu.currency)}
               </span>
@@ -163,6 +182,7 @@ export default function CateringInquiryForm({
               id="name"
               className="field"
               autoComplete="name"
+              placeholder="e.g. Ayesha Khan"
               value={formData.name}
               onChange={(event) => setFormData((prev) => ({ ...prev, name: event.target.value }))}
               {...aria('name')}
@@ -172,13 +192,14 @@ export default function CateringInquiryForm({
 
           <div>
             <label className="field-label" htmlFor="email">
-              Email
+              Email address
             </label>
             <input
               id="email"
               type="email"
               className="field"
               autoComplete="email"
+              placeholder="ayesha@example.com"
               value={formData.email}
               onChange={(event) => setFormData((prev) => ({ ...prev, email: event.target.value }))}
               {...aria('email')}
@@ -188,13 +209,15 @@ export default function CateringInquiryForm({
 
           <div>
             <label className="field-label" htmlFor="phone">
-              Phone number
+              Mobile phone number
             </label>
             <input
               id="phone"
               type="tel"
+              inputMode="tel"
               className="field"
               autoComplete="tel"
+              placeholder="(510) 399-9156"
               value={formData.phone}
               onChange={(event) => setFormData((prev) => ({ ...prev, phone: event.target.value }))}
               {...aria('phone')}
@@ -209,6 +232,7 @@ export default function CateringInquiryForm({
             <input
               id="eventDate"
               type="date"
+              min={new Date().toISOString().slice(0, 10)}
               className="field"
               value={formData.eventDate}
               onChange={(event) => setFormData((prev) => ({ ...prev, eventDate: event.target.value }))}
@@ -217,9 +241,9 @@ export default function CateringInquiryForm({
             {errorText('eventDate')}
           </div>
 
-          <div>
+          <div className="sm:col-span-2">
             <label className="field-label" htmlFor="guestCount">
-              Number of guests
+              Estimated number of guests
             </label>
             <select
               id="guestCount"
@@ -238,7 +262,7 @@ export default function CateringInquiryForm({
 
         <div>
           <label className="field-label" htmlFor="specialRequests">
-            Special requests or dietary requirements
+            Special requests or dietary requirements (optional)
           </label>
           <textarea
             id="specialRequests"
@@ -246,7 +270,7 @@ export default function CateringInquiryForm({
             rows={3}
             value={formData.specialRequests}
             onChange={(event) => setFormData((prev) => ({ ...prev, specialRequests: event.target.value }))}
-            placeholder="Any allergies, preferences, or special preparations?"
+            placeholder="Any spice level preferences, nut/dairy allergies, delivery timing requests?"
           />
         </div>
 
@@ -259,14 +283,14 @@ export default function CateringInquiryForm({
         {/* Action Buttons */}
         <div className="mt-4 flex gap-3 sm:justify-end">
           <button type="button" onClick={onBack} className="btn-secondary flex-1 sm:flex-none" disabled={submitting}>
-            Back
+            Back to Menu
           </button>
           <button
             type="submit"
             className="btn-primary flex-1 sm:flex-none"
             disabled={submitting || selectedItems.length === 0}
           >
-            {submitting ? 'Submitting...' : 'Submit Inquiry'}
+            {submitting ? 'Preparing WhatsApp...' : 'Submit Inquiry via WhatsApp'}
           </button>
         </div>
       </form>

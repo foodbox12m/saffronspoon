@@ -10,16 +10,18 @@ import ZelleScreen from './components/ZelleScreen';
 import CateringLanding from './components/CateringLanding';
 import CateringMenu from './components/CateringMenu';
 import CateringInquiryForm from './components/CateringInquiryForm';
+import CateringConfirmation from './components/CateringConfirmation';
 import { useCart } from './hooks/useCart';
 import { useTheme } from './hooks/useTheme';
 import { claimPayment, createOrder, fetchMenu, fetchQuote } from './lib/api';
 import { localMenu, previewQuote } from './lib/menu';
 import { localMemoCode } from './lib/memo';
+import { formatCents } from './lib/money';
 import { buildOrderMessage, whatsappLink } from './lib/whatsapp';
 import { HAS_API } from './lib/env';
 import type { EventDetails, Menu, Quote, CateringInquiry } from './types';
 
-type Step = 'menu' | 'catering' | 'catering-menu' | 'catering-inquiry' | 'details' | 'review' | 'pay';
+type Step = 'menu' | 'catering' | 'catering-menu' | 'catering-inquiry' | 'catering-submitted' | 'details' | 'review' | 'pay';
 
 const emptyDetails: EventDetails = {
   name: '',
@@ -49,6 +51,7 @@ export default function App() {
 
   // Catering state
   const [cateringSelections, setCateringSelections] = useState<Record<string, number>>({});
+  const [submittedInquiry, setSubmittedInquiry] = useState<{ inquiry: CateringInquiry; whatsappHref: string } | null>(null);
 
   // Refresh the menu from the API when available; the bundled copy renders instantly.
   useEffect(() => {
@@ -155,38 +158,53 @@ export default function App() {
   const submitCateringInquiry = useCallback(async (inquiry: CateringInquiry) => {
     setBusy(true);
     try {
-      // For now, send to WhatsApp as fallback
       const selectedItems = menu.items.filter((item) =>
         inquiry.selectedItems.some((sel) => sel.itemId === item.id)
       );
 
+      const estimatedTotal = inquiry.selectedItems.reduce((total, sel) => {
+        const item = selectedItems.find((i) => i.id === sel.itemId);
+        if (!item) return total;
+        return total + item.prices.full * sel.quantity;
+      }, 0);
+
       const message = [
-        'Hi saffron & spoon! I would like to place a catering inquiry.',
+        'Hi saffron & spoon! I would like to place a Homemade Hyderabadi Food Catering inquiry.',
         '',
-        'Customer Information:',
-        `Name: ${inquiry.name}`,
-        `Email: ${inquiry.email}`,
-        `Phone: ${inquiry.phone}`,
-        `Event Date: ${inquiry.eventDate}`,
-        `Guest Count: ${inquiry.guestCount}`,
+        '*Customer Information:*',
+        `• Name: ${inquiry.name}`,
+        `• Email: ${inquiry.email}`,
+        `• Phone: ${inquiry.phone}`,
+        `• Event Date: ${inquiry.eventDate}`,
+        `• Guest Count: ${inquiry.guestCount}`,
         '',
-        'Requested Items:',
+        '*Requested Dishes:*',
         ...inquiry.selectedItems.map((sel) => {
           const item = selectedItems.find((i) => i.id === sel.itemId);
-          return `• ${sel.quantity} × ${item?.name}`;
+          const lineTotal = item ? item.prices.full * sel.quantity : 0;
+          const unitLabel = item?.unit ? ` (${item.unit})` : ' (Full tray)';
+          return `• ${sel.quantity} × ${item?.name ?? sel.itemId}${unitLabel} — ${formatCents(lineTotal, menu.currency)}`;
         }),
         '',
-        ...(inquiry.specialRequests ? [`Special Requests: ${inquiry.specialRequests}`] : []),
+        `*Estimated Total:* ${formatCents(estimatedTotal, menu.currency)}`,
+        '',
+        ...(inquiry.specialRequests ? [`*Special Requests / Dietary:*`, inquiry.specialRequests, ''] : []),
+        'Looking forward to your confirmation!',
       ].join('\n');
 
       const href = whatsappLink(message);
       window.open(href, '_blank');
+      setSubmittedInquiry({
+        inquiry: { ...inquiry, estimatedTotalCents: estimatedTotal },
+        whatsappHref: href,
+      });
       setCateringSelections({});
-      setStep('menu');
+      setStep('catering-submitted');
+      window.scrollTo({ top: 0 });
     } finally {
       setBusy(false);
     }
-  }, [menu.items]);
+  }, [menu.items, menu.currency]);
 
   const startOver = useCallback(() => {
     cart.clear();
@@ -197,6 +215,7 @@ export default function App() {
     setOrderConfirmed(false);
     setClaimState('idle');
     setCateringSelections({});
+    setSubmittedInquiry(null);
     setStep('menu');
     window.scrollTo({ top: 0 });
   }, [cart]);
@@ -208,7 +227,15 @@ export default function App() {
         onToggleTheme={toggle}
         cartCount={cart.count}
         onOpenCart={() => setCartOpen(true)}
-        onNavigateToCartering={() => setStep('catering')}
+        onNavigateToCatering={() => {
+          setStep('catering');
+          window.scrollTo({ top: 0 });
+        }}
+        onNavigateToMenu={() => {
+          setStep('menu');
+          window.scrollTo({ top: 0 });
+        }}
+        currentStep={step}
       />
 
       <main className="mx-auto flex w-full max-w-6xl flex-col gap-8 px-4 py-8 sm:px-6 sm:py-12">
@@ -225,10 +252,13 @@ export default function App() {
               </p>
               <button
                 type="button"
-                className="btn-primary w-fit mt-2"
-                onClick={() => setStep('catering')}
+                className="btn-secondary w-fit mt-2 inline-flex items-center gap-2"
+                onClick={() => {
+                  setStep('catering');
+                  window.scrollTo({ top: 0 });
+                }}
               >
-                Or order by catering
+                <span>Explore Custom Catering Services →</span>
               </button>
             </section>
             {offlineNotice ? <Notice tone="warn">{offlineNotice}</Notice> : null}
@@ -249,7 +279,14 @@ export default function App() {
         {step === 'catering' ? (
           <CateringLanding
             selectionCount={Object.values(cateringSelections).reduce((a, b) => a + b, 0)}
-            onStartOrdering={() => setStep('catering-menu')}
+            onStartOrdering={() => {
+              setStep('catering-menu');
+              window.scrollTo({ top: 0 });
+            }}
+            onNavigateToMenu={() => {
+              setStep('menu');
+              window.scrollTo({ top: 0 });
+            }}
           />
         ) : null}
 
@@ -258,17 +295,20 @@ export default function App() {
             <section className="flex flex-col gap-4">
               <button
                 type="button"
-                onClick={() => setStep('catering')}
+                onClick={() => {
+                  setStep('catering');
+                  window.scrollTo({ top: 0 });
+                }}
                 className="text-saffron-600 hover:text-saffron-700 dark:text-saffron-400 dark:hover:text-saffron-300 w-fit text-sm"
               >
-                ← Back
+                ← Back to Catering Overview
               </button>
               <p className="eyebrow">Build Your Catering Order</p>
               <h2 className="text-3xl font-bold leading-[1.15]">
                 Select your dishes
               </h2>
               <p className="max-w-xl text-sm leading-relaxed text-ink-600 dark:text-cream-300">
-                Choose the items you'd like for your event. You can adjust quantities for each dish.
+                Choose the dishes and quantities you'd like for your event. You can adjust counts for any dish.
               </p>
             </section>
             <CateringMenu
@@ -281,22 +321,40 @@ export default function App() {
                 }));
               }}
             />
-            <div className="flex gap-3">
-              <button
-                type="button"
-                onClick={() => setStep('catering')}
-                className="btn-secondary"
-              >
-                Back
-              </button>
-              <button
-                type="button"
-                onClick={() => setStep('catering-inquiry')}
-                className="btn-primary flex-1 sm:flex-none"
-                disabled={Object.values(cateringSelections).every((q) => q === 0)}
-              >
-                Continue to Details
-              </button>
+            <div className="surface flex flex-col gap-3 p-4 sm:flex-row sm:items-center sm:justify-between">
+              <div className="text-sm">
+                <span className="font-bold text-ink-950 dark:text-cream-50">
+                  {Object.values(cateringSelections).reduce((a, b) => a + b, 0)} dishes selected
+                </span>
+                {Object.values(cateringSelections).reduce((a, b) => a + b, 0) === 0 ? (
+                  <span className="ml-2 text-xs text-ink-500 dark:text-cream-400">
+                    (select at least 1 dish to continue)
+                  </span>
+                ) : null}
+              </div>
+              <div className="flex gap-3">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setStep('catering');
+                    window.scrollTo({ top: 0 });
+                  }}
+                  className="btn-secondary"
+                >
+                  Back
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setStep('catering-inquiry');
+                    window.scrollTo({ top: 0 });
+                  }}
+                  className="btn-primary flex-1 sm:flex-none"
+                  disabled={Object.values(cateringSelections).reduce((a, b) => a + b, 0) === 0}
+                >
+                  Continue to Event Details →
+                </button>
+              </div>
             </div>
           </>
         ) : null}
@@ -306,8 +364,20 @@ export default function App() {
             menu={menu}
             selections={cateringSelections}
             submitting={busy}
-            onBack={() => setStep('catering-menu')}
+            onBack={() => {
+              setStep('catering-menu');
+              window.scrollTo({ top: 0 });
+            }}
             onSubmit={submitCateringInquiry}
+          />
+        ) : null}
+
+        {step === 'catering-submitted' && submittedInquiry ? (
+          <CateringConfirmation
+            menu={menu}
+            inquiry={submittedInquiry.inquiry}
+            whatsappHref={submittedInquiry.whatsappHref}
+            onDone={startOver}
           />
         ) : null}
 

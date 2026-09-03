@@ -5,7 +5,7 @@
   'use strict';
 
   // Business WhatsApp number, international format, digits only.
-  var WHATSAPP_NUMBER = '15551234567';
+  var WHATSAPP_NUMBER = '15103999156';
   var APP_URL = '/saffronspoon/app/';
 
   var drawer = document.querySelector('.order-drawer');

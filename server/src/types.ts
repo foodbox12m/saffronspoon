@@ -22,6 +22,9 @@ export interface MenuItem {
   aliases: string[];
   popular?: boolean;
   fullTrayOnly?: boolean;
+  unit?: string;
+  minOrder?: number;
+  notes?: string;
 }
 
 export interface Menu {

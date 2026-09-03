@@ -46,7 +46,7 @@ export function assertMenuValid(): void {
     if (item.prices.half !== null && (!Number.isInteger(item.prices.half) || item.prices.half <= 0)) {
       throw new Error(`Menu item ${item.id} has an invalid half-tray price (must be integer cents)`);
     }
-    if (item.prices.half === null && item.fullTrayOnly !== true) {
+    if (item.prices.half === null && item.fullTrayOnly !== true && !item.unit) {
       throw new Error(`Menu item ${item.id} has no half price but is not marked fullTrayOnly`);
     }
   }
@@ -190,7 +190,9 @@ export function menuForPrompt(): string {
     if (items.length === 0) continue;
     lines.push(`${category.name}:`);
     for (const item of items) {
-      const half = item.prices.half === null ? 'full tray only' : `half $${item.prices.half / 100}`;
+      const half = item.prices.half === null
+        ? (item.unit ? `per ${item.unit}` : 'full tray only')
+        : `half $${item.prices.half / 100}`;
       lines.push(
         `  - ${item.name} (id: ${item.id}) — full $${item.prices.full / 100}, ${half}` +
           ` · spice ${item.spice}/5 · ${item.protein}` +
