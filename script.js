@@ -11,6 +11,12 @@ const confirmPayment = document.querySelector('.confirm-payment');
 const paymentComplete = document.querySelector('.payment-complete');
 let paymentConfirmed = false;
 
+const orderPanel = document.querySelector('.order-now-grid > div');
+const orderHeading = orderPanel?.querySelector('h2');
+if (orderHeading) {
+  orderHeading.insertAdjacentHTML('afterend', '<div class="order-meta"><strong>4.3 <span aria-hidden="true">&#9733;</span></strong><span>170+ ratings</span><span>Indian · Hyderabadi</span></div><div class="order-modes"><span>Delivery</span><span>Pickup</span><span>Group order</span></div>');
+}
+
 const renderOrder = () => {
   itemList.textContent = '';
   if (!items.length) {
