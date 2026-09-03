@@ -75,7 +75,7 @@
       "protein": "goat",
       "allergens": ["dairy", "tree-nuts"],
       "dietary": ["halal"],
-      "pairings": ["goat-mutton-marag", "mango-truffle"],
+      "pairings": ["goat-mutton-marag", "mango-trifle"],
       "aliases": ["mutton biryani", "zafrani biryani", "goat biryani", "saffron mutton biryani"],
       "popular": true
     },
@@ -89,7 +89,7 @@
       "protein": "chicken",
       "allergens": ["dairy", "tree-nuts"],
       "dietary": ["halal"],
-      "pairings": ["chicken-65", "mango-truffle"],
+      "pairings": ["chicken-65", "mango-trifle"],
       "aliases": ["chicken biryani", "zafrani chicken", "saffron chicken biryani"],
       "popular": true
     },
@@ -146,8 +146,8 @@
       "aliases": ["mutton masala", "hyderabadi mutton", "goat masala"]
     },
     {
-      "id": "mango-truffle",
-      "name": "Mango Truffle",
+      "id": "mango-trifle",
+      "name": "Mango Trifle",
       "category": "desserts",
       "description": "Alphonso mango mousse over cocoa sponge, finished with a dark chocolate glaze.",
       "prices": { "full": 22000, "half": 10000 },
@@ -156,8 +156,40 @@
       "allergens": ["dairy", "gluten", "eggs"],
       "dietary": ["vegetarian"],
       "pairings": ["zafrani-mutton-biryani", "zafrani-chicken-biryani"],
-      "aliases": ["mango truffle cake", "mango dessert", "truffle"],
+      "aliases": ["mango trifle cake", "mango dessert", "trifle", "mango truffle"],
       "popular": true
+    },
+    {
+      "id": "coconut-dal-puri",
+      "name": "Coconut / Dal Puri",
+      "category": "desserts",
+      "description": "Golden, crispy puri shell with choice of coconut or dal filling. Minimum order 20 pieces.",
+      "prices": { "full": 6000, "half": null },
+      "spice": 0,
+      "protein": "none",
+      "allergens": ["gluten", "tree-nuts"],
+      "dietary": ["vegetarian"],
+      "pairings": ["zafrani-mutton-biryani", "zafrani-chicken-biryani"],
+      "aliases": ["dal puri", "coconut puri", "puri", "dessert puri"],
+      "fullTrayOnly": false,
+      "minOrder": 20,
+      "unit": "piece",
+      "notes": "Available in coconut or dal filling"
+    },
+    {
+      "id": "kheer",
+      "name": "Kheer",
+      "category": "desserts",
+      "description": "Traditional rice pudding made with milk, cardamom, and topped with dry fruits. 16 oz.",
+      "prices": { "full": 700, "half": null },
+      "spice": 0,
+      "protein": "none",
+      "allergens": ["dairy", "tree-nuts"],
+      "dietary": ["vegetarian"],
+      "pairings": ["zafrani-mutton-biryani", "zafrani-chicken-biryani", "coconut-dal-puri"],
+      "aliases": ["rice pudding", "kheer dessert"],
+      "fullTrayOnly": false,
+      "unit": "16 oz"
     }
   ]
 }
