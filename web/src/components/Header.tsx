@@ -19,6 +19,9 @@ export default function Header({ theme, onToggleTheme, cartCount, onOpenCart }: 
             S&amp;S
           </span>
           <span className="min-w-0">
+            <span className="text-[0.66rem] uppercase tracking-[0.16em] text-ink-500 dark:text-cream-400">
+              Homemade Hyderabadi Food Catering
+            </span>
             <span className="block font-display text-[0.92rem] font-bold leading-tight sm:text-lg">
               saffron <i className="not-italic text-saffron-600 dark:text-saffron-400">&amp;</i> spoon
             </span>

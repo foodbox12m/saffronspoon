@@ -171,12 +171,12 @@ export default function App() {
         {step === 'menu' ? (
           <>
             <section className="flex flex-col gap-4">
-              <p className="eyebrow">Catering by the tray</p>
+              <p className="eyebrow">Homemade Hyderabadi Food Catering</p>
               <h1 className="max-w-2xl text-[2.1rem] font-bold leading-[1.08] sm:text-5xl">
                 Hyderabadi feasts, delivered by the tray.
               </h1>
               <p className="max-w-xl text-base leading-relaxed text-ink-600 dark:text-cream-300">
-                Pick your dishes, choose full or half trays, and pay by Zelle. Full trays serve
+                Authentic homemade Hyderabadi cuisine. Pick your dishes, choose full or half trays, and pay by Zelle. Full trays serve
                 18&ndash;22 guests; half trays serve 9&ndash;11.
               </p>
             </section>
