@@ -39,7 +39,11 @@ const closeDrawer = () => {
 document.querySelectorAll('[data-open-order]').forEach(button => button.addEventListener('click', openDrawer));
 document.querySelectorAll('[data-close-order]').forEach(button => button.addEventListener('click', closeDrawer));
 document.querySelectorAll('.add-button').forEach(button => button.addEventListener('click', () => {
-  items.push({ name: button.dataset.name, price: Number(button.dataset.price) });
+  const selector = button.closest('.tray-action')?.querySelector('.tray-select');
+  const size = selector ? selector.value : '';
+  const price = selector ? Number(button.dataset[size]) : Number(button.dataset.price);
+  const name = selector ? `${button.dataset.name} (${size} tray)` : button.dataset.name;
+  items.push({ name, price });
   renderOrder();
   openDrawer();
 }));
