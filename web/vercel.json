@@ -1,0 +1,25 @@
+{
+  "rewrites": [
+    {
+      "$regex": "(.*)",
+      "$context": "head",
+      "target": "/$1"
+    }
+  ],
+  "headers": [
+    {
+      "source": "/",
+      "headers": [
+        ["content-type", "text/html"]
+      ]
+    }
+  ],
+  "runtimeConfig": {
+    "SUPABASE_URL": true,
+    "SUPABASE_SERVICE_ROLE_KEY": true
+  },
+  "env": {
+    "MENU_URL": "/menu",
+    "ZELLE_PHONE": "+15005551234"
+  }
+}
