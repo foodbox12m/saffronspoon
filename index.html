@@ -4,6 +4,9 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="description" content="saffron & spoon creates generous Hyderabadi and Mediterranean feasts for the people you love.">
+  <meta name="referrer" content="strict-origin-when-cross-origin">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; base-uri 'self'; object-src 'none'; frame-ancestors 'none'; form-action 'none'; script-src 'self'; img-src 'self' https://images.unsplash.com data:; style-src 'self' https://fonts.googleapis.com 'unsafe-inline'; font-src https://fonts.gstatic.com; connect-src 'self';">
+  <meta http-equiv="Permissions-Policy" content="camera=(), microphone=(), geolocation=(), payment=()">
   <title>saffron & spoon | Gather around good food</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -34,12 +37,6 @@
   </main>
   <aside class="order-drawer" aria-label="Your order" aria-hidden="true"><div class="drawer-head"><div><p class="eyebrow">Your order</p><h2>Ready when you are.</h2></div><button class="close-drawer" type="button" data-close-order aria-label="Close order">&times;</button></div><div class="order-items"><p class="empty-order">Your table is waiting. Add a dish to get started.</p></div><div class="drawer-foot"><div><span>Estimated total</span><strong class="order-total">$0</strong></div><a class="button button-dark full-width" href="mailto:hello@saffronandstone.com?subject=New%20order%20request">Send order request</a></div></aside><div class="drawer-backdrop" data-close-order></div>
   <footer><div class="container footer-wrap"><strong>saffron <i>&</i> spoon</strong><span>Hyderabadi soul. Mediterranean spirit.</span><span>© 2026 saffron & spoon</span></div></footer>
-  <script>
-    const drawer = document.querySelector('.order-drawer'); const backdrop = document.querySelector('.drawer-backdrop'); const items = []; const itemList = document.querySelector('.order-items'); const total = document.querySelector('.order-total'); const count = document.querySelector('.order-count');
-    const renderOrder = () => { itemList.innerHTML = items.length ? items.map((item, index) => `<div class="order-item"><span>${item.name}</span><strong>$${item.price}</strong><button type="button" data-remove="${index}" aria-label="Remove ${item.name}">&times;</button></div>`).join('') : '<p class="empty-order">Your table is waiting. Add a dish to get started.</p>'; total.textContent = `$${items.reduce((sum, item) => sum + item.price, 0)}`; count.textContent = items.length; };
-    const openDrawer = () => { drawer.classList.add('open'); drawer.setAttribute('aria-hidden', 'false'); backdrop.classList.add('visible'); }; const closeDrawer = () => { drawer.classList.remove('open'); drawer.setAttribute('aria-hidden', 'true'); backdrop.classList.remove('visible'); };
-    document.querySelectorAll('[data-open-order]').forEach(button => button.addEventListener('click', openDrawer)); document.querySelectorAll('[data-close-order]').forEach(button => button.addEventListener('click', closeDrawer)); document.querySelectorAll('.add-button').forEach(button => button.addEventListener('click', () => { items.push({ name: button.dataset.name, price: Number(button.dataset.price) }); renderOrder(); openDrawer(); })); itemList.addEventListener('click', event => { if (event.target.dataset.remove !== undefined) { items.splice(Number(event.target.dataset.remove), 1); renderOrder(); } });
-    document.querySelectorAll('.filter').forEach(filter => filter.addEventListener('click', () => { document.querySelector('.filter.active').classList.remove('active'); filter.classList.add('active'); document.querySelectorAll('.dish-card').forEach(card => { card.hidden = filter.dataset.filter !== 'all' && card.dataset.category !== filter.dataset.filter; }); })); const toggle = document.querySelector('.menu-toggle'); toggle.addEventListener('click', () => { const open = toggle.getAttribute('aria-expanded') === 'true'; toggle.setAttribute('aria-expanded', String(!open)); document.querySelector('.main-nav').classList.toggle('show'); });
-  </script>
+  <script src="script.js" defer></script>
 </body>
 </html>
